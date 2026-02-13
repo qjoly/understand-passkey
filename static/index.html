@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understand Passkeys &mdash; with a Cup of Coffee</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9749;</text></svg>">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --espresso: #1b120d;
+            --dark-roast: #2c1e14;
+            --medium-roast: #3d2b1f;
+            --light-roast: #5c3d2e;
+            --crema: #c4956a;
+            --latte: #d4a574;
+            --milk-foam: #f0e6d3;
+            --cream: #faf5ed;
+            --white-cup: #fdfbf7;
+            --steam: #e8ddd0;
+            --sugar: #fff8ee;
+            --caramel: #b8860b;
+            --cinnamon: #d2691e;
+            --green-mint: #6b9e6b;
+            --red-berry: #c0564b;
+            --text-dark: #2c1e14;
+            --text-body: #4a3728;
+            --text-muted: #8b7355;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--cream);
+            color: var(--text-body);
+            line-height: 1.75;
+            min-height: 100vh;
+        }
+
+        /* Subtle coffee bean pattern on the background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: radial-gradient(ellipse 3px 4px at 20px 20px, rgba(92,61,46,.04) 50%, transparent 50%),
+                              radial-gradient(ellipse 3px 4px at 60px 50px, rgba(92,61,46,.03) 50%, transparent 50%),
+                              radial-gradient(ellipse 2px 3px at 100px 30px, rgba(92,61,46,.03) 50%, transparent 50%);
+            background-size: 120px 70px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header with coffee cup steam animation */
+        .header {
+            text-align: center;
+            padding: 2.5rem 0 1.5rem;
+        }
+        .header .cup-icon {
+            font-size: 3.5rem;
+            display: block;
+            margin-bottom: .5rem;
+            animation: steam 3s ease-in-out infinite;
+        }
+        @keyframes steam {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 2.4rem;
+            margin-bottom: .3rem;
+            color: var(--dark-roast);
+        }
+        h1 small {
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            display: block;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-top: .3rem;
+        }
+
+        h2 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.4rem;
+            margin: 2.5rem 0 1rem;
+            color: var(--dark-roast);
+            border-bottom: 2px solid var(--latte);
+            padding-bottom: .4rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        h2 .icon { font-size: 1.2rem; }
+
+        h3 {
+            font-size: 1.05rem;
+            margin: 1.4rem 0 .4rem;
+            color: var(--medium-roast);
+            font-weight: 600;
+        }
+
+        p, li { color: var(--text-body); margin-bottom: .6rem; }
+        ul { padding-left: 1.4rem; }
+        strong { color: var(--dark-roast); }
+        em { color: var(--light-roast); }
+
+        a { color: var(--cinnamon); text-decoration: underline; }
+        a:hover { color: var(--caramel); }
+
+        code {
+            background: var(--steam);
+            padding: .15rem .45rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .85em;
+            color: var(--light-roast);
+            border: 1px solid rgba(180,150,120,.2);
+        }
+
+        /* Cards look like coffee-stained paper */
+        .card {
+            background: var(--white-cup);
+            border: 1px solid var(--steam);
+            border-radius: 14px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 12px rgba(44,30,20,.06), 0 1px 3px rgba(44,30,20,.04);
+        }
+
+        /* ASCII diagrams */
+        .diagram {
+            background: var(--espresso);
+            border: 1px solid var(--medium-roast);
+            border-radius: 10px;
+            padding: 1.2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .8rem;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.5;
+            color: var(--crema);
+            margin: 1rem 0;
+        }
+        .diagram strong { color: var(--latte); }
+        .diagram em { color: var(--green-mint); font-style: normal; }
+
+        /* Comparison table */
+        .compare-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        .compare-table th, .compare-table td {
+            padding: .6rem .8rem;
+            border: 1px solid var(--steam);
+            text-align: left;
+            font-size: .9rem;
+        }
+        .compare-table th {
+            background: var(--dark-roast);
+            color: var(--milk-foam);
+            font-weight: 600;
+        }
+        .compare-table td { background: var(--white-cup); }
+        .compare-table tr:hover td { background: var(--sugar); }
+
+        /* Demo section -- the "coffee counter" */
+        .demo-section {
+            background: linear-gradient(135deg, var(--dark-roast), var(--medium-roast));
+            border: 2px solid var(--crema);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            color: var(--milk-foam);
+            box-shadow: 0 4px 20px rgba(27,18,13,.2);
+        }
+        .demo-section h2 {
+            border-bottom-color: var(--crema);
+            color: var(--milk-foam);
+            margin-top: 0;
+        }
+        .demo-section p { color: var(--steam); }
+        .demo-section strong { color: var(--latte); }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-group label {
+            display: block;
+            margin-bottom: .3rem;
+            color: var(--crema);
+            font-size: .9rem;
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: .75rem 1rem;
+            border: 1px solid var(--light-roast);
+            border-radius: 10px;
+            background: var(--espresso);
+            color: var(--milk-foam);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        input[type="text"]::placeholder { color: var(--crema); opacity: .5; }
+        input[type="text"]:focus {
+            border-color: var(--latte);
+            box-shadow: 0 0 0 3px rgba(212,165,116,.2);
+        }
+
+        .btn-row { display: flex; gap: .8rem; flex-wrap: wrap; margin-top: 1rem; }
+        button {
+            padding: .75rem 1.6rem;
+            border: none;
+            border-radius: 10px;
+            font-size: .95rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background .2s, transform .1s, box-shadow .2s;
+            font-weight: 600;
+        }
+        button:active { transform: scale(.97); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--crema), var(--latte));
+            color: var(--espresso);
+            box-shadow: 0 2px 8px rgba(196,149,106,.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--latte), var(--caramel));
+            box-shadow: 0 3px 12px rgba(196,149,106,.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,.08);
+            color: var(--milk-foam);
+            border: 1px solid var(--crema);
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,.15); }
+
+        button:disabled { opacity: .4; cursor: not-allowed; }
+
+        /* Log box looks like a coffee receipt */
+        .log-box {
+            background: var(--espresso);
+            border: 1px solid var(--medium-roast);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1.2rem;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .8rem;
+            line-height: 1.6;
+        }
+        .log-entry { padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+        .log-entry:last-child { border-bottom: none; }
+        .log-info { color: var(--latte); }
+        .log-success { color: var(--green-mint); }
+        .log-error { color: var(--red-berry); }
+        .log-data { color: var(--crema); font-size: .75rem; opacity: .7; }
+
+        .user-list { margin-top: 1rem; }
+        .user-chip {
+            display: inline-block;
+            background: rgba(255,255,255,.08);
+            border: 1px solid var(--crema);
+            border-radius: 20px;
+            padding: .3rem .9rem;
+            margin: .2rem .3rem;
+            font-size: .85rem;
+            color: var(--milk-foam);
+        }
+        .user-chip .count { color: var(--latte); margin-left: .3rem; }
+
+        /* Step indicators */
+        .step-indicator { display: flex; gap: .5rem; margin: 1rem 0; }
+        .step {
+            flex: 1; text-align: center; padding: .5rem; border-radius: 8px;
+            background: rgba(255,255,255,.05); font-size: .8rem; color: var(--crema);
+            border: 1px solid var(--light-roast); transition: all .3s;
+        }
+        .step.active {
+            border-color: var(--latte);
+            color: var(--latte);
+            background: rgba(212,165,116,.12);
+        }
+        .step.done {
+            border-color: var(--green-mint);
+            color: var(--green-mint);
+            background: rgba(107,158,107,.1);
+        }
+
+        /* Divider with coffee bean */
+        .bean-divider {
+            text-align: center;
+            margin: 2rem 0;
+            position: relative;
+        }
+        .bean-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0; right: 0;
+            height: 1px;
+            background: var(--steam);
+        }
+        .bean-divider span {
+            position: relative;
+            background: var(--cream);
+            padding: 0 1rem;
+            font-size: 1.2rem;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: .8rem;
+            margin-top: 3rem;
+            padding: 1.5rem;
+            border-top: 1px solid var(--steam);
+        }
+
+        /* Smooth scrollbar in dark areas */
+        .log-box::-webkit-scrollbar { width: 6px; }
+        .log-box::-webkit-scrollbar-track { background: transparent; }
+        .log-box::-webkit-scrollbar-thumb { background: var(--light-roast); border-radius: 3px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <span class="cup-icon">&#9749;</span>
+        <h1>Understand Passkeys<small>with a cup of coffee</small></h1>
+    </div>
+
+    <p style="text-align:center; color:var(--text-muted); max-width:600px; margin:0 auto 2rem;">
+        Grab your favourite brew and let's explore how passkeys work &mdash;
+        from the cryptography behind them to a hands-on demo you can try right here.
+    </p>
+
+    <!-- ============================================================ -->
+    <!-- THEORY -->
+    <!-- ============================================================ -->
+
+    <h2><span class="icon">&#9749;</span> What are Passkeys?</h2>
+    <p>
+        Passkeys are a modern replacement for passwords based on the <strong>WebAuthn</strong> (Web Authentication) standard.
+        Instead of memorising a secret string, your device creates a <strong>public/private key pair</strong> that is unique
+        to you and the website. The private key never leaves your device &mdash; only a cryptographic proof is sent to the server.
+    </p>
+    <p>
+        Think of it like a coffee shop loyalty card that only <em>your</em> fingerprint can stamp &mdash;
+        even if someone photocopies the card, they can't forge your stamp.
+    </p>
+
+    <div class="card">
+        <h3>Passwords vs Passkeys</h3>
+        <table class="compare-table">
+            <tr><th></th><th>Passwords</th><th>Passkeys</th></tr>
+            <tr><td><strong>Storage</strong></td><td>Server stores a hash of your secret</td><td>Server stores only your <em>public</em> key</td></tr>
+            <tr><td><strong>Phishing</strong></td><td>Can be typed into fake sites</td><td>Cryptographically bound to the real domain</td></tr>
+            <tr><td><strong>Reuse</strong></td><td>Users often reuse across sites</td><td>Unique key pair per site, automatically</td></tr>
+            <tr><td><strong>Breach impact</strong></td><td>Hashed passwords can be cracked</td><td>Public keys are useless to attackers</td></tr>
+            <tr><td><strong>User effort</strong></td><td>Must remember or use a manager</td><td>Biometric/PIN unlock &mdash; nothing to remember</td></tr>
+        </table>
+    </div>
+
+    <div class="bean-divider"><span>&#x2615;</span></div>
+
+    <h2><span class="icon">&#128273;</span> How it works &mdash; the Cryptography</h2>
+    <p>
+        Passkeys use <strong>asymmetric (public-key) cryptography</strong>. During registration your authenticator
+        (the device's secure enclave, a hardware key like YubiKey, or the OS credential manager) generates a key pair:
+    </p>
+    <ul>
+        <li><strong>Private key</strong> &mdash; stays on your device, protected by biometrics or a PIN. Never sent anywhere. Like the secret recipe for your favourite espresso blend.</li>
+        <li><strong>Public key</strong> &mdash; sent to the server and stored alongside your account. Like the menu board &mdash; everyone can see it, but it doesn't reveal the recipe.</li>
+    </ul>
+    <p>
+        During login, the server sends a random <code>challenge</code>. Your authenticator signs the challenge with your
+        private key. The server verifies the signature using the stored public key. If it matches &mdash; you're in.
+    </p>
+
+    <h2><span class="icon">&#128221;</span> Registration Flow</h2>
+    <p>Like ordering your first cup &mdash; the barista (server) needs to get to know you:</p>
+    <div class="diagram">
+<strong>Browser</strong>                        <strong>Server</strong>                        <strong>Authenticator</strong>
+   |                               |                               |
+   |  1. "I want to register"      |                               |
+   |  ---- surname --------------> |                               |
+   |                               |                               |
+   |  2. Challenge + options       |                               |
+   |  <---- challenge, rpId ------ |                               |
+   |                               |                               |
+   |  3. navigator.credentials.create(options)                     |
+   |  -----------------------------------------------------------> |
+   |                               |    Generates key pair         |
+   |                               |    Signs challenge            |
+   |  4. Attestation response      |                               |
+   |  <----------------------------------------------------------- |
+   |                               |                               |
+   |  5. Send attestation to server|                               |
+   |  ---- publicKey, signedData ->|                               |
+   |                               |  6. Verify &amp; store public key |
+   |  7. "Registration complete!"  |                               |
+   |  <---- OK ------------------- |                               |</div>
+
+    <h2><span class="icon">&#128274;</span> Authentication Flow</h2>
+    <p>Coming back for another cup &mdash; the barista recognises your order:</p>
+    <div class="diagram">
+<strong>Browser</strong>                        <strong>Server</strong>                        <strong>Authenticator</strong>
+   |                               |                               |
+   |  1. "I want to log in"        |                               |
+   |  ---- surname --------------> |                               |
+   |                               |                               |
+   |  2. Challenge + allowed creds |                               |
+   |  <---- challenge, credIds --- |                               |
+   |                               |                               |
+   |  3. navigator.credentials.get(options)                        |
+   |  -----------------------------------------------------------> |
+   |                               |     Finds matching key        |
+   |                               |     Signs challenge           |
+   |  4. Assertion response        |                               |
+   |  <----------------------------------------------------------- |
+   |                               |                               |
+   |  5. Send assertion to server  |                               |
+   |  ---- signature, authData --> |                               |
+   |                               |  6. Verify signature with     |
+   |                               |     stored public key         |
+   |  7. "Welcome back!"           |                               |
+   |  <---- OK ------------------- |                               |</div>
+
+    <div class="bean-divider"><span>&#x2615;</span></div>
+
+    <h2><span class="icon">&#128218;</span> Key Concepts</h2>
+    <div class="card">
+        <h3>Relying Party (RP)</h3>
+        <p>The website/server you are authenticating to. Identified by its domain (<code>rpId</code>). The authenticator binds the key pair to this domain, which prevents phishing &mdash; like how your loyalty card only works at one coffee chain.</p>
+
+        <h3>Challenge</h3>
+        <p>A random value generated by the server for each ceremony. Prevents replay attacks &mdash; a captured response cannot be reused because the challenge changes every time. Think of it as the daily special that changes each morning.</p>
+
+        <h3>Credential ID</h3>
+        <p>A unique identifier for each passkey. The server stores this so it can tell the authenticator which key to use during login &mdash; like the order number on your receipt.</p>
+
+        <h3>Attestation (Registration)</h3>
+        <p>The authenticator's response during registration. Contains the new public key, credential ID, and optionally proof of the authenticator model.</p>
+
+        <h3>Assertion (Login)</h3>
+        <p>The authenticator's response during login. Contains a signature over the challenge and some metadata, proving possession of the private key.</p>
+
+        <h3>User Verification</h3>
+        <p>The authenticator can require biometrics, PIN, or device unlock before using the key. This provides "something you are" or "something you know" on top of "something you have" (the device) &mdash; two factors in one sip.</p>
+    </div>
+
+    <div class="bean-divider"><span>&#x2615;</span></div>
+
+    <!-- ============================================================ -->
+    <!-- INTERACTIVE DEMO -->
+    <!-- ============================================================ -->
+
+    <h2><span class="icon">&#127911;</span> Interactive Demo &mdash; Try it!</h2>
+    <div class="demo-section">
+        <p style="margin-bottom:1rem;">
+            Time to taste-test! Enter your surname below and register a passkey, then log in with it.
+            All data is stored <strong>in server memory only</strong> &mdash; it resets when the server restarts, like a fresh pot of coffee each morning.
+        </p>
+
+        <div class="form-group">
+            <label for="surname">Your Surname</label>
+            <input type="text" id="surname" placeholder="e.g. Dupont" autocomplete="off" />
+        </div>
+
+        <div class="btn-row">
+            <button class="btn-primary" id="btn-register" onclick="doRegister()">Register Passkey</button>
+            <button class="btn-secondary" id="btn-login" onclick="doLogin()">Login with Passkey</button>
+            <button class="btn-secondary" id="btn-users" onclick="refreshUsers()">Refresh Users</button>
+        </div>
+
+        <div id="step-reg" class="step-indicator" style="display:none;">
+            <div class="step" id="sr1">1. Begin</div>
+            <div class="step" id="sr2">2. Create Credential</div>
+            <div class="step" id="sr3">3. Verify</div>
+            <div class="step" id="sr4">4. Done</div>
+        </div>
+        <div id="step-login" class="step-indicator" style="display:none;">
+            <div class="step" id="sl1">1. Begin</div>
+            <div class="step" id="sl2">2. Sign Challenge</div>
+            <div class="step" id="sl3">3. Verify</div>
+            <div class="step" id="sl4">4. Authenticated</div>
+        </div>
+
+        <div class="user-list" id="user-list"></div>
+
+        <div class="log-box" id="log"></div>
+    </div>
+
+    <h2><span class="icon">&#128270;</span> What just happened?</h2>
+    <div class="card">
+        <p>When you clicked <strong>Register</strong>:</p>
+        <ul>
+            <li>The browser asked the server for a registration <code>challenge</code> and options (steps 1-2 in the diagram above).</li>
+            <li>Your operating system or browser popped up a prompt to create a passkey. Behind the scenes, a new key pair was generated inside a secure enclave.</li>
+            <li>The public key and signed attestation were sent back to the server, which verified and stored them.</li>
+        </ul>
+        <p style="margin-top:.8rem;">When you clicked <strong>Login</strong>:</p>
+        <ul>
+            <li>The server sent a fresh random challenge.</li>
+            <li>Your device found the matching private key, signed the challenge, and sent the signature back.</li>
+            <li>The server verified the signature against your stored public key. <strong>No password was ever transmitted.</strong></li>
+        </ul>
+    </div>
+
+    <h2><span class="icon">&#128737;</span> Security Properties</h2>
+    <div class="card">
+        <ul>
+            <li><strong>Phishing-resistant:</strong> the credential is bound to the exact domain. An attacker on a different domain cannot trigger your passkey &mdash; like how your key only fits your front door.</li>
+            <li><strong>No shared secrets:</strong> the server never sees your private key. Even if the database leaks, attackers get only public keys &mdash; useless without the private half.</li>
+            <li><strong>Replay-proof:</strong> every ceremony uses a fresh random challenge. Old responses are useless, like yesterday's coffee grounds.</li>
+            <li><strong>Multi-factor in one gesture:</strong> possession of the device + biometric/PIN = two factors in a single step.</li>
+        </ul>
+    </div>
+
+    <footer>
+        understand-passkeys-with.<strong>a-cup-of</strong>.coffee &mdash; built with Go + WebAuthn &mdash; all data stored in memory &#9749;
+    </footer>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const logBox = document.getElementById('log');
+
+function log(msg, cls = 'log-info') {
+    const d = document.createElement('div');
+    d.className = 'log-entry ' + cls;
+    d.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+    logBox.prepend(d);
+}
+
+function logData(label, obj) {
+    const d = document.createElement('div');
+    d.className = 'log-entry log-data';
+    d.textContent = '  ' + label + ': ' + JSON.stringify(obj).slice(0, 200);
+    logBox.prepend(d);
+}
+
+function setSteps(prefix, active) {
+    const container = document.getElementById('step-' + prefix);
+    container.style.display = 'flex';
+    for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById(prefix[0] === 'r' ? 'sr' + i : 'sl' + i);
+        el.className = 'step';
+        if (i < active) el.classList.add('done');
+        else if (i === active) el.classList.add('active');
+    }
+}
+
+// base64url encode/decode helpers for WebAuthn
+function bufToBase64url(buf) {
+    const bytes = new Uint8Array(buf);
+    let str = '';
+    for (const b of bytes) str += String.fromCharCode(b);
+    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function base64urlToBuf(b64) {
+    const str = b64.replace(/-/g, '+').replace(/_/g, '/');
+    const bin = atob(str);
+    const buf = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    return buf.buffer;
+}
+
+function getSurname() {
+    const v = document.getElementById('surname').value.trim();
+    if (!v) { alert('Please enter your surname first.'); return null; }
+    return v;
+}
+
+// ---------------------------------------------------------------------------
+// Registration
+// ---------------------------------------------------------------------------
+
+async function doRegister() {
+    const surname = getSurname();
+    if (!surname) return;
+    const btn = document.getElementById('btn-register');
+    btn.disabled = true;
+
+    try {
+        // Step 1: Begin registration
+        setSteps('reg', 1);
+        log('Brewing registration for "' + surname + '"...');
+
+        const beginRes = await fetch('/api/register/begin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ surname }),
+        });
+        const beginData = await beginRes.json();
+        if (!beginRes.ok) throw new Error(beginData.error);
+
+        const token = beginData.token;
+        const options = beginData.options.publicKey;
+        log('Challenge received from the server');
+        logData('Challenge', bufToBase64url(base64urlToBuf(options.challenge)));
+
+        // Convert base64url fields to ArrayBuffers
+        options.challenge = base64urlToBuf(options.challenge);
+        options.user.id = base64urlToBuf(options.user.id);
+        if (options.excludeCredentials) {
+            options.excludeCredentials = options.excludeCredentials.map(c => ({
+                ...c, id: base64urlToBuf(c.id),
+            }));
+        }
+
+        // Step 2: Create credential
+        setSteps('reg', 2);
+        log('Asking your authenticator to grind a fresh key pair...');
+
+        const credential = await navigator.credentials.create({ publicKey: options });
+        log('Credential created by authenticator!', 'log-success');
+        logData('Credential ID', bufToBase64url(credential.rawId));
+
+        // Step 3: Send to server for verification
+        setSteps('reg', 3);
+        log('Sending credential to server for verification...');
+
+        const attestationResponse = {
+            id: credential.id,
+            rawId: bufToBase64url(credential.rawId),
+            type: credential.type,
+            response: {
+                attestationObject: bufToBase64url(credential.response.attestationObject),
+                clientDataJSON: bufToBase64url(credential.response.clientDataJSON),
+            },
+        };
+
+        if (credential.response.getTransports) {
+            attestationResponse.response.transports = credential.response.getTransports();
+        }
+
+        const finishRes = await fetch(
+            '/api/register/finish?token=' + encodeURIComponent(token) + '&surname=' + encodeURIComponent(surname),
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(attestationResponse),
+            }
+        );
+        const finishData = await finishRes.json();
+        if (!finishRes.ok) throw new Error(finishData.error);
+
+        // Step 4: Done
+        setSteps('reg', 4);
+        log('Registration complete! Your passkey is ready to serve.', 'log-success');
+        logData('Stored credential', finishData.credentialId);
+        refreshUsers();
+
+    } catch (e) {
+        log('Registration failed: ' + e.message, 'log-error');
+        console.error(e);
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Login
+// ---------------------------------------------------------------------------
+
+async function doLogin() {
+    const surname = getSurname();
+    if (!surname) return;
+    const btn = document.getElementById('btn-login');
+    btn.disabled = true;
+
+    try {
+        // Step 1: Begin login
+        setSteps('login', 1);
+        log('Pouring a login for "' + surname + '"...');
+
+        const beginRes = await fetch('/api/login/begin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ surname }),
+        });
+        const beginData = await beginRes.json();
+        if (!beginRes.ok) throw new Error(beginData.error);
+
+        const token = beginData.token;
+        const options = beginData.options.publicKey;
+        log('Challenge received from server');
+
+        options.challenge = base64urlToBuf(options.challenge);
+        if (options.allowCredentials) {
+            options.allowCredentials = options.allowCredentials.map(c => ({
+                ...c, id: base64urlToBuf(c.id),
+            }));
+        }
+
+        // Step 2: Get assertion
+        setSteps('login', 2);
+        log('Asking your authenticator to sign the challenge...');
+
+        const assertion = await navigator.credentials.get({ publicKey: options });
+        log('Assertion received from authenticator!', 'log-success');
+
+        // Step 3: Send to server
+        setSteps('login', 3);
+        log('Sending signed assertion to server...');
+
+        const assertionResponse = {
+            id: assertion.id,
+            rawId: bufToBase64url(assertion.rawId),
+            type: assertion.type,
+            response: {
+                authenticatorData: bufToBase64url(assertion.response.authenticatorData),
+                clientDataJSON: bufToBase64url(assertion.response.clientDataJSON),
+                signature: bufToBase64url(assertion.response.signature),
+                userHandle: assertion.response.userHandle ? bufToBase64url(assertion.response.userHandle) : '',
+            },
+        };
+
+        const finishRes = await fetch(
+            '/api/login/finish?token=' + encodeURIComponent(token) + '&surname=' + encodeURIComponent(surname),
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(assertionResponse),
+            }
+        );
+        const finishData = await finishRes.json();
+        if (!finishRes.ok) throw new Error(finishData.error);
+
+        // Step 4: Done
+        setSteps('login', 4);
+        log('Welcome back, ' + finishData.surname + '! Your coffee is ready.', 'log-success');
+
+    } catch (e) {
+        log('Login failed: ' + e.message, 'log-error');
+        console.error(e);
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// User list
+// ---------------------------------------------------------------------------
+
+async function refreshUsers() {
+    try {
+        const res = await fetch('/api/users');
+        const users = await res.json();
+        const container = document.getElementById('user-list');
+        if (users.length === 0) {
+            container.innerHTML = '<span style="color:var(--crema);font-size:.85rem;">No regulars yet &mdash; be the first!</span>';
+            return;
+        }
+        container.innerHTML = '<span style="color:var(--crema);font-size:.85rem;">Regulars: </span>' +
+            users.map(u => '<span class="user-chip">' + u.surname + '<span class="count">' + u.credentialCount + ' key(s)</span></span>').join('');
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+// Load users on page load
+refreshUsers();
+
+// Check if WebAuthn is supported
+if (!window.PublicKeyCredential) {
+    log('This browser does not support WebAuthn/Passkeys. Try a modern browser!', 'log-error');
+    document.getElementById('btn-register').disabled = true;
+    document.getElementById('btn-login').disabled = true;
+}
+</script>
+</body>
+</html>
