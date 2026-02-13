@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: understand-passkey
+  labels:
+    app: understand-passkey
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: understand-passkey
+  template:
+    metadata:
+      labels:
+        app: understand-passkey
+    spec:
+      containers:
+        - name: understand-passkey
+          image: ghcr.io/qjoly/understand-passkey:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "8080"
+            - name: RP_ID
+              value: "passkey.example.com"
+            - name: RP_ORIGIN
+              value: "https://passkey.example.com"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 15

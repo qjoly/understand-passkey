@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: understand-passkey
+  labels:
+    app: understand-passkey
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - passkey.example.com
+      secretName: understand-passkey-tls
+  rules:
+    - host: passkey.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: understand-passkey
+                port:
+                  number: 80
