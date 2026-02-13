@@ -201,6 +201,12 @@ func (s *Server) handleRegisterFinish(w http.ResponseWriter, r *http.Request) {
 	user.Credentials = append(user.Credentials, *credential)
 	s.store.PutUser(user)
 
+	log.Printf("[REGISTER] user=%q credentialId=%s (total credentials: %d)",
+		user.Surname,
+		base64.RawURLEncoding.EncodeToString(credential.ID),
+		len(user.Credentials),
+	)
+
 	writeJSON(w, http.StatusOK, map[string]any{
 		"status":       "ok",
 		"credentialId": base64.RawURLEncoding.EncodeToString(credential.ID),
@@ -268,6 +274,12 @@ func (s *Server) handleLoginFinish(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	s.store.PutUser(user)
+
+	log.Printf("[LOGIN] user=%q credentialId=%s signCount=%d",
+		user.Surname,
+		base64.RawURLEncoding.EncodeToString(credential.ID),
+		credential.Authenticator.SignCount,
+	)
 
 	writeJSON(w, http.StatusOK, map[string]any{
 		"status":  "ok",
