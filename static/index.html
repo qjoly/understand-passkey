@@ -379,6 +379,14 @@
             50% { box-shadow: 0 2px 20px rgba(196,149,106,.6), 0 0 40px rgba(196,149,106,.2); }
         }
 
+        /* Scrollable table wrapper for mobile */
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 1rem 0;
+        }
+        .table-scroll .compare-table { margin: 0; }
+
         /* Diagram line-typing effect */
         .diagram.typing { overflow: hidden; }
 
@@ -419,6 +427,72 @@
                 rgba(196,149,106,.5) 100%
             );
         }
+
+        /* ===================== Responsive ===================== */
+
+        /* Tablet / small laptop */
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.2rem; margin: 1.5rem 0 .8rem; }
+            .container { padding: 1.5rem 1rem; }
+            .card { padding: 1.2rem; margin: 1rem 0; }
+            .demo-section { padding: 1.4rem; margin: 1.5rem 0; }
+            .diagram { font-size: .7rem; padding: 1rem; }
+            .header { padding: 1.5rem 0 1rem; }
+            .header .cup-icon { font-size: 2.8rem; }
+            .bean-divider { margin: 1.5rem 0; }
+            footer { margin-top: 2rem; padding: 1rem; }
+        }
+
+        /* Phone */
+        @media (max-width: 480px) {
+            h1 { font-size: 1.5rem; }
+            h1 small { font-size: .85rem; }
+            h2 { font-size: 1.1rem; margin: 1.2rem 0 .6rem; }
+            h3 { font-size: .95rem; }
+            .container { padding: 1rem .75rem; }
+            .card { padding: 1rem; border-radius: 10px; }
+            .demo-section { padding: 1rem; border-radius: 12px; }
+            .diagram { font-size: .55rem; padding: .8rem; border-radius: 8px; }
+            .header .cup-icon { font-size: 2.2rem; }
+            .header { padding: 1rem 0 .8rem; }
+
+            /* Buttons: full-width stacked */
+            .btn-row { flex-direction: column; gap: .5rem; }
+            .btn-row button { width: 100%; }
+
+            /* Step indicators: wrap + abbreviate-friendly */
+            .step-indicator { flex-wrap: wrap; gap: .3rem; }
+            .step {
+                flex: 1 1 45%;
+                min-width: 0;
+                font-size: .7rem;
+                padding: .4rem .3rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            /* Comparison table: smaller text when scrolling */
+            .compare-table th, .compare-table td {
+                font-size: .8rem;
+                padding: .4rem .5rem;
+            }
+
+            /* Log box */
+            .log-box { font-size: .7rem; max-height: 250px; padding: .8rem; }
+
+            /* Reduce spacing */
+            .bean-divider { margin: 1rem 0; }
+            p, li { font-size: .9rem; }
+            .form-group label { font-size: .85rem; }
+            input[type="text"] { font-size: .9rem; padding: .6rem .8rem; }
+            button { font-size: .85rem; padding: .65rem 1.2rem; }
+            .user-chip { font-size: .8rem; padding: .25rem .7rem; }
+
+            /* Coffee fluid: shorter on small screens */
+            .coffee-fluid { height: 35px; }
+        }
     </style>
 </head>
 <body>
@@ -458,6 +532,7 @@
 
     <div class="card anim-hidden">
         <h3>Passwords vs Passkeys</h3>
+        <div class="table-scroll">
         <table class="compare-table">
             <tr><th></th><th>Passwords</th><th>Passkeys</th></tr>
             <tr><td><strong>Storage</strong></td><td>Server stores a hash of your secret</td><td>Server stores only your <em>public</em> key</td></tr>
@@ -466,9 +541,8 @@
             <tr><td><strong>Breach impact</strong></td><td>Hashed passwords can be cracked</td><td>Public keys are useless to attackers</td></tr>
             <tr><td><strong>User effort</strong></td><td>Must remember or use a manager</td><td>Biometric/PIN unlock &mdash; nothing to remember</td></tr>
         </table>
+        </div>
     </div>
-
-    <div class="bean-divider anim-hidden"><span>&#x2615;</span></div>
 
     <h2 class="anim-hidden"><span class="icon">&#128273;</span> How it works &mdash; the Cryptography</h2>
     <p>
@@ -625,7 +699,7 @@
     </div>
 
     <footer>
-        understand-passkeys-with.<strong>a-cup-of</strong>.coffee &mdash; built with Go + WebAuthn &mdash; all data stored in memory &#9749;
+        understand-passkeys-with.<strong>a-cup-of.coffee</strong>&mdash; built with Go + WebAuthn &mdash; all data stored in memory &#9749;
     </footer>
 </div>
 
