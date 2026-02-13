@@ -61,7 +61,7 @@
             z-index: 1;
         }
 
-        /* Header with coffee cup steam animation */
+        /* Header */
         .header {
             text-align: center;
             padding: 2.5rem 0 1.5rem;
@@ -70,11 +70,6 @@
             font-size: 3.5rem;
             display: block;
             margin-bottom: .5rem;
-            animation: steam 3s ease-in-out infinite;
-        }
-        @keyframes steam {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
         }
 
         h1 {
@@ -190,6 +185,8 @@
         }
         .demo-section p { color: var(--steam); }
         .demo-section strong { color: var(--latte); }
+        .demo-intro { margin-bottom: 1rem; }
+        .demo-post-register { margin-top: .8rem; }
 
         .form-group { margin-bottom: 1rem; }
         .form-group label {
@@ -271,6 +268,7 @@
         .log-data { color: var(--crema); font-size: .75rem; opacity: .7; }
 
         .user-list { margin-top: 1rem; }
+        .user-list-label { color: var(--crema); font-size: .85rem; }
         .user-chip {
             display: inline-block;
             background: rgba(255,255,255,.08);
@@ -341,7 +339,13 @@
         .header .cup-icon { opacity: 0; }
         .header h1 { opacity: 0; }
         .header h1 small { opacity: 0; }
-        .intro-text { opacity: 0; }
+        .intro-text {
+            text-align: center;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            opacity: 0;
+        }
 
         /* Falling coffee drops background */
         .coffee-drops {
@@ -368,15 +372,6 @@
             inset: 1px;
             border-radius: inherit;
             background: linear-gradient(135deg, rgba(255,255,255,.25) 0%, transparent 60%);
-        }
-
-        /* Glowing pulse on buttons when hovered */
-        .btn-primary.glow-pulse {
-            animation: glowPulse 2s ease-in-out infinite;
-        }
-        @keyframes glowPulse {
-            0%, 100% { box-shadow: 0 2px 8px rgba(196,149,106,.3); }
-            50% { box-shadow: 0 2px 20px rgba(196,149,106,.6), 0 0 40px rgba(196,149,106,.2); }
         }
 
         /* Scrollable table wrapper for mobile */
@@ -493,6 +488,17 @@
             /* Coffee fluid: shorter on small screens */
             .coffee-fluid { height: 35px; }
         }
+
+        /* ===================== Accessibility ===================== */
+        @media (prefers-reduced-motion: reduce) {
+            .anim-hidden { opacity: 1; }
+            .header .cup-icon,
+            .header h1,
+            .header h1 small,
+            .intro-text { opacity: 1; }
+            .coffee-drops { display: none; }
+            .coffee-fluid-wave { animation: none; }
+        }
     </style>
 </head>
 <body>
@@ -510,7 +516,7 @@
         <h1>Understand Passkeys<small>with a cup of coffee</small></h1>
     </div>
 
-    <p class="intro-text" style="text-align:center; color:var(--text-muted); max-width:600px; margin:0 auto 2rem;">
+    <p class="intro-text">
         Grab your favourite brew and let's explore how passkeys work &mdash;
         from the cryptography behind them to a hands-on demo you can try right here.
     </p>
@@ -638,7 +644,7 @@
 
     <h2 class="anim-hidden"><span class="icon">&#127911;</span> Interactive Demo &mdash; Try it!</h2>
     <div class="demo-section anim-hidden">
-        <p style="margin-bottom:1rem;">
+        <p class="demo-intro">
             Time to taste-test! Enter your surname below and register a passkey, then log in with it.
             All data is stored <strong>in server memory only</strong> &mdash; it resets when the server restarts, like a fresh pot of coffee each morning.
         </p>
@@ -680,7 +686,7 @@
             <li>Your operating system or browser popped up a prompt to create a passkey. Behind the scenes, a new key pair was generated inside a secure enclave.</li>
             <li>The public key and signed attestation were sent back to the server, which verified and stored them.</li>
         </ul>
-        <p style="margin-top:.8rem;">When you clicked <strong>Login</strong>:</p>
+        <p class="demo-post-register">When you clicked <strong>Login</strong>:</p>
         <ul>
             <li>The server sent a fresh random challenge.</li>
             <li>Your device found the matching private key, signed the challenge, and sent the signature back.</li>
@@ -699,7 +705,9 @@
     </div>
 
     <footer>
-        understand-passkeys-with.<strong>a-cup-of.coffee</strong>&mdash; built with Go + WebAuthn &mdash; all data stored in memory &#9749;
+        understand-passkeys-with.<strong>a-cup-of.coffee</strong> &mdash; built with Go + WebAuthn &mdash; all data stored in memory &#9749;
+        <br>
+        <a href="https://github.com/qjoly/understand-passkey" target="_blank" rel="noopener noreferrer">GitHub</a>
     </footer>
 </div>
 
@@ -708,7 +716,7 @@
 // Helpers
 // ---------------------------------------------------------------------------
 
-const logBox = document.getElementById('log');
+const logBox = anime.utils.$('#log')[0];
 
 function log(msg, cls = 'log-info') {
     const d = document.createElement('div');
@@ -725,10 +733,10 @@ function logData(label, obj) {
 }
 
 function setSteps(prefix, active) {
-    const container = document.getElementById('step-' + prefix);
-    container.style.display = 'flex';
+    const container = anime.utils.$('#step-' + prefix)[0];
+    anime.utils.set(container, { display: 'flex' });
     for (let i = 1; i <= 4; i++) {
-        const el = document.getElementById(prefix[0] === 'r' ? 'sr' + i : 'sl' + i);
+        const el = anime.utils.$('#' + (prefix[0] === 'r' ? 'sr' + i : 'sl' + i))[0];
         el.className = 'step';
         if (i < active) el.classList.add('done');
         else if (i === active) el.classList.add('active');
@@ -752,7 +760,7 @@ function base64urlToBuf(b64) {
 }
 
 function getSurname() {
-    const v = document.getElementById('surname').value.trim();
+    const v = anime.utils.$('#surname')[0].value.trim();
     if (!v) { alert('Please enter your surname first.'); return null; }
     return v;
 }
@@ -764,7 +772,7 @@ function getSurname() {
 async function doRegister() {
     const surname = getSurname();
     if (!surname) return;
-    const btn = document.getElementById('btn-register');
+    const btn = anime.utils.$('#btn-register')[0];
     btn.disabled = true;
 
     try {
@@ -852,7 +860,7 @@ async function doRegister() {
 async function doLogin() {
     const surname = getSurname();
     if (!surname) return;
-    const btn = document.getElementById('btn-login');
+    const btn = anime.utils.$('#btn-login')[0];
     btn.disabled = true;
 
     try {
@@ -933,13 +941,29 @@ async function refreshUsers() {
     try {
         const res = await fetch('/api/users');
         const users = await res.json();
-        const container = document.getElementById('user-list');
+        const container = anime.utils.$('#user-list')[0];
+        container.innerHTML = '';
         if (users.length === 0) {
-            container.innerHTML = '<span style="color:var(--crema);font-size:.85rem;">No regulars yet &mdash; be the first!</span>';
+            const empty = document.createElement('span');
+            empty.className = 'user-list-label';
+            empty.textContent = 'No regulars yet \u2014 be the first!';
+            container.appendChild(empty);
             return;
         }
-        container.innerHTML = '<span style="color:var(--crema);font-size:.85rem;">Regulars: </span>' +
-            users.map(u => '<span class="user-chip">' + u.surname + '<span class="count">' + u.credentialCount + ' key(s)</span></span>').join('');
+        const label = document.createElement('span');
+        label.className = 'user-list-label';
+        label.textContent = 'Regulars: ';
+        container.appendChild(label);
+        users.forEach(function(u) {
+            const chip = document.createElement('span');
+            chip.className = 'user-chip';
+            chip.textContent = u.surname;
+            const count = document.createElement('span');
+            count.className = 'count';
+            count.textContent = u.credentialCount + ' key(s)';
+            chip.appendChild(count);
+            container.appendChild(chip);
+        });
     } catch (e) {
         console.error(e);
     }
@@ -951,8 +975,8 @@ refreshUsers();
 // Check if WebAuthn is supported
 if (!window.PublicKeyCredential) {
     log('This browser does not support WebAuthn/Passkeys. Try a modern browser!', 'log-error');
-    document.getElementById('btn-register').disabled = true;
-    document.getElementById('btn-login').disabled = true;
+    anime.utils.$('#btn-register')[0].disabled = true;
+    anime.utils.$('#btn-login')[0].disabled = true;
 }
 </script>
 
@@ -961,53 +985,42 @@ if (!window.PublicKeyCredential) {
 <!-- ================================================================= -->
 <script>
 (function() {
-    var { animate, createTimeline, stagger } = anime;
+    var { animate, createTimeline, stagger, utils, onScroll } = anime;
+    var $ = utils.$;
+    var set = utils.set;
+    var random = utils.random;
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // =================================================================
-    // Helper: IntersectionObserver to trigger a callback once when
-    // an element scrolls into the viewport (or is already visible).
-    // =================================================================
-    function onReveal(el, callback, threshold) {
-        threshold = threshold || 0.15;
-        var observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    observer.unobserve(entry.target);
-                    callback(entry.target);
-                }
-            });
-        }, { threshold: threshold });
-        observer.observe(el);
-    }
+    // Skip all animations if the user prefers reduced motion
+    if (reducedMotion) return;
 
     // =================================================================
     // 1. Falling coffee drops background
     // =================================================================
-    var dropsContainer = document.getElementById('coffee-drops');
+    var dropsContainer = $('#coffee-drops')[0];
     var dropCount = 25;
 
     for (var i = 0; i < dropCount; i++) {
         var drop = document.createElement('span');
         drop.className = 'coffee-drop';
-        var size = 6 + Math.random() * 10;
-        drop.style.width = size + 'px';
-        drop.style.height = size + 'px';
-        drop.style.left = (Math.random() * 100) + '%';
+        var size = random(6, 16, 1);
+        set(drop, { width: size + 'px', height: size + 'px', left: random(0, 100, 1) + '%' });
         dropsContainer.appendChild(drop);
     }
 
-    document.querySelectorAll('.coffee-drop').forEach(function(drop) {
-        var fallDuration = 4000 + Math.random() * 6000;
-        var startDelay = Math.random() * 8000;
-        var drift = -30 + Math.random() * 60;
+    $('.coffee-drop').forEach(function(drop) {
+        var fallDuration = random(4000, 10000);
+        var startDelay = random(0, 8000);
+        var drift = random(-30, 30);
+        var peakOpacity = random(0.3, 0.45, 2);
 
         animate(drop, {
             translateY: [0, window.innerHeight + 60],
             translateX: [0, drift],
-            rotate: [135, 135 + (Math.random() * 40 - 20)],
+            rotate: [135, random(115, 155)],
             opacity: [
-                { to: 0.3 + Math.random() * 0.15, duration: fallDuration * 0.1 },
-                { to: 0.3 + Math.random() * 0.15, duration: fallDuration * 0.7 },
+                { to: peakOpacity, duration: fallDuration * 0.1 },
+                { to: peakOpacity, duration: fallDuration * 0.7 },
                 { to: 0, duration: fallDuration * 0.2 }
             ],
             duration: fallDuration,
@@ -1020,7 +1033,7 @@ if (!window.PublicKeyCredential) {
     // =================================================================
     // 1b. Coffee fluid wave animation at the bottom
     // =================================================================
-    var waves = document.querySelectorAll('.coffee-fluid-wave');
+    var waves = $('.coffee-fluid-wave');
     waves.forEach(function(wave, i) {
         animate(wave, {
             translateX: ['-2%', '2%'],
@@ -1060,87 +1073,86 @@ if (!window.PublicKeyCredential) {
     // =================================================================
     // 3. Scroll-triggered reveals for all .anim-hidden elements
     // =================================================================
-    document.querySelectorAll('.anim-hidden').forEach(function(el) {
-        onReveal(el, function(target) {
-            animate(target, {
-                opacity: [0, 1],
-                translateY: [40, 0],
-                duration: 700,
-                ease: 'out(3)',
-            });
+    $('.anim-hidden').forEach(function(el) {
+        animate(el, {
+            opacity: [0, 1],
+            translateY: [40, 0],
+            duration: 700,
+            ease: 'out(3)',
+            autoplay: onScroll({ target: el, enter: 'bottom-=15% top' }),
         });
     });
 
     // =================================================================
     // 4. Table row stagger animation
     // =================================================================
-    var compareTable = document.querySelector('.compare-table');
+    var compareTable = $('.compare-table')[0];
     if (compareTable) {
-        var tableRows = compareTable.querySelectorAll('tr');
+        var tableRows = $('.compare-table tr');
         // hide rows initially
-        tableRows.forEach(function(row) { row.style.opacity = '0'; });
+        set(tableRows, { opacity: 0 });
 
-        onReveal(compareTable, function() {
-            animate(tableRows, {
-                opacity: [0, 1],
-                translateX: [-30, 0],
-                duration: 500,
-                delay: stagger(100),
-                ease: 'out(3)',
-            });
+        animate(tableRows, {
+            opacity: [0, 1],
+            translateX: [-30, 0],
+            duration: 500,
+            delay: stagger(100),
+            ease: 'out(3)',
+            autoplay: onScroll({ target: compareTable, enter: 'bottom-=15% top' }),
         });
     }
 
     // =================================================================
     // 5. Diagram "typewriter" height reveal
     // =================================================================
-    document.querySelectorAll('.diagram.typing').forEach(function(diagram) {
+    $('.diagram.typing').forEach(function(diagram) {
         // Remove anim-hidden opacity; the typing effect handles visibility
         diagram.classList.remove('anim-hidden');
-        diagram.style.opacity = '1';
-        diagram.style.maxHeight = '0';
-        diagram.style.overflow = 'hidden';
+        set(diagram, { opacity: 1, maxHeight: 0, overflow: 'hidden' });
 
         // Measure the real height by temporarily removing the constraint
-        diagram.style.position = 'absolute';
-        diagram.style.visibility = 'hidden';
-        diagram.style.maxHeight = 'none';
+        set(diagram, { position: 'absolute', visibility: 'hidden', maxHeight: 'none' });
         var fullHeight = diagram.scrollHeight;
-        diagram.style.position = '';
-        diagram.style.visibility = '';
-        diagram.style.maxHeight = '0';
+        set(diagram, { position: '', visibility: '', maxHeight: 0 });
 
-        onReveal(diagram, function() {
-            animate(diagram, {
-                maxHeight: [0, fullHeight],
-                duration: 1500,
-                ease: 'out(2)',
-            });
-        }, 0.05);
+        animate(diagram, {
+            maxHeight: [0, fullHeight],
+            duration: 1500,
+            ease: 'out(2)',
+            autoplay: onScroll({ target: diagram, enter: 'bottom-=5% top' }),
+        });
     });
 
     // =================================================================
     // 6. Bean divider pop-in
     // =================================================================
-    document.querySelectorAll('.bean-divider span').forEach(function(span) {
-        span.style.display = 'inline-block';
-        span.style.transform = 'scale(0)';
+    $('.bean-divider span').forEach(function(span) {
+        set(span, { display: 'inline-block', scale: 0 });
 
-        onReveal(span.parentElement, function() {
-            animate(span, {
-                scale: [0, 1],
-                rotate: [0, 360],
-                duration: 600,
-                ease: 'out(4)',
-            });
+        animate(span, {
+            scale: [0, 1],
+            rotate: [0, 360],
+            duration: 600,
+            ease: 'out(4)',
+            autoplay: onScroll({ target: span.parentElement, enter: 'bottom-=15% top' }),
         });
     });
 
     // =================================================================
     // 7. Button hover + glow
     // =================================================================
-    document.querySelectorAll('.btn-primary').forEach(function(btn) {
-        btn.classList.add('glow-pulse');
+    $('.btn-primary').forEach(function(btn) {
+        // Glow pulse via anime.js loop (replaces CSS @keyframes glowPulse)
+        animate(btn, {
+            boxShadow: [
+                '0 2px 6px rgba(196,149,106,.15)',
+                '0 2px 12px rgba(196,149,106,.35), 0 0 20px rgba(196,149,106,.1)',
+            ],
+            duration: 3000,
+            loop: true,
+            alternate: true,
+            ease: 'inOut(2)',
+        });
         btn.addEventListener('mouseenter', function() {
             animate(btn, { scale: 1.06, duration: 300, ease: 'out(3)' });
         });
@@ -1149,7 +1161,7 @@ if (!window.PublicKeyCredential) {
         });
     });
 
-    document.querySelectorAll('.btn-secondary').forEach(function(btn) {
+    $('.btn-secondary').forEach(function(btn) {
         btn.addEventListener('mouseenter', function() {
             animate(btn, { scale: 1.04, duration: 250, ease: 'out(3)' });
         });
@@ -1161,7 +1173,7 @@ if (!window.PublicKeyCredential) {
     // =================================================================
     // 8. Animate new log entries as they appear
     // =================================================================
-    var logBoxEl = document.getElementById('log');
+    var logBoxEl = $('#log')[0];
     new MutationObserver(function(mutations) {
         mutations.forEach(function(m) {
             m.addedNodes.forEach(function(node) {
@@ -1180,9 +1192,9 @@ if (!window.PublicKeyCredential) {
     // =================================================================
     // 9. Animate user chips when they appear
     // =================================================================
-    var userListEl = document.getElementById('user-list');
+    var userListEl = $('#user-list')[0];
     new MutationObserver(function() {
-        var chips = userListEl.querySelectorAll('.user-chip');
+        var chips = $('.user-chip');
         if (chips.length > 0) {
             animate(chips, {
                 opacity: [0, 1],
@@ -1197,7 +1209,7 @@ if (!window.PublicKeyCredential) {
     // =================================================================
     // 10. Card hover lift
     // =================================================================
-    document.querySelectorAll('.card').forEach(function(card) {
+    $('.card').forEach(function(card) {
         card.addEventListener('mouseenter', function() {
             animate(card, {
                 translateY: -4,
@@ -1213,22 +1225,6 @@ if (!window.PublicKeyCredential) {
             });
         });
     });
-
-    // =================================================================
-    // 11. Footer fade in
-    // =================================================================
-    var footer = document.querySelector('footer');
-    if (footer) {
-        footer.style.opacity = '0';
-        onReveal(footer, function() {
-            animate(footer, {
-                opacity: [0, 1],
-                translateY: [20, 0],
-                duration: 600,
-                ease: 'out(3)',
-            });
-        });
-    }
 
 })();
 </script>

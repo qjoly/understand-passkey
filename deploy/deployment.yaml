@@ -17,6 +17,7 @@ spec:
       containers:
         - name: understand-passkey
           image: ghcr.io/qjoly/understand-passkey:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
               protocol: TCP
