@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Understand Passkeys &mdash; with a Cup of Coffee</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9749;</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/animejs@4.3.5/dist/bundles/anime.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -334,9 +335,99 @@
         .log-box::-webkit-scrollbar { width: 6px; }
         .log-box::-webkit-scrollbar-track { background: transparent; }
         .log-box::-webkit-scrollbar-thumb { background: var(--light-roast); border-radius: 3px; }
+
+        /* anime.js: initially hidden elements for reveal animations */
+        .anim-hidden { opacity: 0; }
+        .header .cup-icon { opacity: 0; }
+        .header h1 { opacity: 0; }
+        .header h1 small { opacity: 0; }
+        .intro-text { opacity: 0; }
+
+        /* Falling coffee drops background */
+        .coffee-drops {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .coffee-drop {
+            position: absolute;
+            top: -40px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(135deg);
+            background: var(--crema);
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+        .coffee-drop::after {
+            content: '';
+            position: absolute;
+            inset: 1px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255,255,255,.25) 0%, transparent 60%);
+        }
+
+        /* Glowing pulse on buttons when hovered */
+        .btn-primary.glow-pulse {
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 2px 8px rgba(196,149,106,.3); }
+            50% { box-shadow: 0 2px 20px rgba(196,149,106,.6), 0 0 40px rgba(196,149,106,.2); }
+        }
+
+        /* Diagram line-typing effect */
+        .diagram.typing { overflow: hidden; }
+
+        /* Coffee fluid pooling at the bottom */
+        .coffee-fluid {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .coffee-fluid-wave {
+            position: absolute;
+            bottom: 0; left: -5%; right: -5%;
+            height: 100%;
+            border-radius: 50% 50% 0 0 / 30px 30px 0 0;
+            background: linear-gradient(to bottom,
+                rgba(196,149,106,.0) 0%,
+                rgba(196,149,106,.2) 30%,
+                rgba(196,149,106,.35) 100%
+            );
+        }
+        .coffee-fluid-wave:nth-child(2) {
+            height: 75%;
+            border-radius: 40% 60% 0 0 / 20px 25px 0 0;
+            background: linear-gradient(to bottom,
+                rgba(196,149,106,.0) 0%,
+                rgba(196,149,106,.25) 40%,
+                rgba(196,149,106,.4) 100%
+            );
+        }
+        .coffee-fluid-wave:nth-child(3) {
+            height: 50%;
+            border-radius: 60% 40% 0 0 / 15px 20px 0 0;
+            background: linear-gradient(to bottom,
+                rgba(196,149,106,.0) 0%,
+                rgba(196,149,106,.3) 50%,
+                rgba(196,149,106,.5) 100%
+            );
+        }
     </style>
 </head>
 <body>
+<div class="coffee-drops" id="coffee-drops"></div>
+<div class="coffee-fluid" id="coffee-fluid">
+    <div class="coffee-fluid-wave"></div>
+    <div class="coffee-fluid-wave"></div>
+    <div class="coffee-fluid-wave"></div>
+</div>
 <div class="container">
 
     <!-- Header -->
@@ -345,7 +436,7 @@
         <h1>Understand Passkeys<small>with a cup of coffee</small></h1>
     </div>
 
-    <p style="text-align:center; color:var(--text-muted); max-width:600px; margin:0 auto 2rem;">
+    <p class="intro-text" style="text-align:center; color:var(--text-muted); max-width:600px; margin:0 auto 2rem;">
         Grab your favourite brew and let's explore how passkeys work &mdash;
         from the cryptography behind them to a hands-on demo you can try right here.
     </p>
@@ -354,7 +445,7 @@
     <!-- THEORY -->
     <!-- ============================================================ -->
 
-    <h2><span class="icon">&#9749;</span> What are Passkeys?</h2>
+    <h2 class="anim-hidden"><span class="icon">&#9749;</span> What are Passkeys?</h2>
     <p>
         Passkeys are a modern replacement for passwords based on the <strong>WebAuthn</strong> (Web Authentication) standard.
         Instead of memorising a secret string, your device creates a <strong>public/private key pair</strong> that is unique
@@ -365,7 +456,7 @@
         even if someone photocopies the card, they can't forge your stamp.
     </p>
 
-    <div class="card">
+    <div class="card anim-hidden">
         <h3>Passwords vs Passkeys</h3>
         <table class="compare-table">
             <tr><th></th><th>Passwords</th><th>Passkeys</th></tr>
@@ -377,9 +468,9 @@
         </table>
     </div>
 
-    <div class="bean-divider"><span>&#x2615;</span></div>
+    <div class="bean-divider anim-hidden"><span>&#x2615;</span></div>
 
-    <h2><span class="icon">&#128273;</span> How it works &mdash; the Cryptography</h2>
+    <h2 class="anim-hidden"><span class="icon">&#128273;</span> How it works &mdash; the Cryptography</h2>
     <p>
         Passkeys use <strong>asymmetric (public-key) cryptography</strong>. During registration your authenticator
         (the device's secure enclave, a hardware key like YubiKey, or the OS credential manager) generates a key pair:
@@ -393,9 +484,9 @@
         private key. The server verifies the signature using the stored public key. If it matches &mdash; you're in.
     </p>
 
-    <h2><span class="icon">&#128221;</span> Registration Flow</h2>
+    <h2 class="anim-hidden"><span class="icon">&#128221;</span> Registration Flow</h2>
     <p>Like ordering your first cup &mdash; the barista (server) needs to get to know you:</p>
-    <div class="diagram">
+    <div class="diagram anim-hidden typing">
 <strong>Browser</strong>                        <strong>Server</strong>                        <strong>Authenticator</strong>
    |                               |                               |
    |  1. "I want to register"      |                               |
@@ -417,9 +508,9 @@
    |  7. "Registration complete!"  |                               |
    |  <---- OK ------------------- |                               |</div>
 
-    <h2><span class="icon">&#128274;</span> Authentication Flow</h2>
+    <h2 class="anim-hidden"><span class="icon">&#128274;</span> Authentication Flow</h2>
     <p>Coming back for another cup &mdash; the barista recognises your order:</p>
-    <div class="diagram">
+    <div class="diagram anim-hidden typing">
 <strong>Browser</strong>                        <strong>Server</strong>                        <strong>Authenticator</strong>
    |                               |                               |
    |  1. "I want to log in"        |                               |
@@ -442,10 +533,10 @@
    |  7. "Welcome back!"           |                               |
    |  <---- OK ------------------- |                               |</div>
 
-    <div class="bean-divider"><span>&#x2615;</span></div>
+    <div class="bean-divider anim-hidden"><span>&#x2615;</span></div>
 
-    <h2><span class="icon">&#128218;</span> Key Concepts</h2>
-    <div class="card">
+    <h2 class="anim-hidden"><span class="icon">&#128218;</span> Key Concepts</h2>
+    <div class="card anim-hidden">
         <h3>Relying Party (RP)</h3>
         <p>The website/server you are authenticating to. Identified by its domain (<code>rpId</code>). The authenticator binds the key pair to this domain, which prevents phishing &mdash; like how your loyalty card only works at one coffee chain.</p>
 
@@ -465,14 +556,14 @@
         <p>The authenticator can require biometrics, PIN, or device unlock before using the key. This provides "something you are" or "something you know" on top of "something you have" (the device) &mdash; two factors in one sip.</p>
     </div>
 
-    <div class="bean-divider"><span>&#x2615;</span></div>
+    <div class="bean-divider anim-hidden"><span>&#x2615;</span></div>
 
     <!-- ============================================================ -->
     <!-- INTERACTIVE DEMO -->
     <!-- ============================================================ -->
 
-    <h2><span class="icon">&#127911;</span> Interactive Demo &mdash; Try it!</h2>
-    <div class="demo-section">
+    <h2 class="anim-hidden"><span class="icon">&#127911;</span> Interactive Demo &mdash; Try it!</h2>
+    <div class="demo-section anim-hidden">
         <p style="margin-bottom:1rem;">
             Time to taste-test! Enter your surname below and register a passkey, then log in with it.
             All data is stored <strong>in server memory only</strong> &mdash; it resets when the server restarts, like a fresh pot of coffee each morning.
@@ -507,8 +598,8 @@
         <div class="log-box" id="log"></div>
     </div>
 
-    <h2><span class="icon">&#128270;</span> What just happened?</h2>
-    <div class="card">
+    <h2 class="anim-hidden"><span class="icon">&#128270;</span> What just happened?</h2>
+    <div class="card anim-hidden">
         <p>When you clicked <strong>Register</strong>:</p>
         <ul>
             <li>The browser asked the server for a registration <code>challenge</code> and options (steps 1-2 in the diagram above).</li>
@@ -523,8 +614,8 @@
         </ul>
     </div>
 
-    <h2><span class="icon">&#128737;</span> Security Properties</h2>
-    <div class="card">
+    <h2 class="anim-hidden"><span class="icon">&#128737;</span> Security Properties</h2>
+    <div class="card anim-hidden">
         <ul>
             <li><strong>Phishing-resistant:</strong> the credential is bound to the exact domain. An attacker on a different domain cannot trigger your passkey &mdash; like how your key only fits your front door.</li>
             <li><strong>No shared secrets:</strong> the server never sees your private key. Even if the database leaks, attackers get only public keys &mdash; useless without the private half.</li>
@@ -789,6 +880,283 @@ if (!window.PublicKeyCredential) {
     document.getElementById('btn-register').disabled = true;
     document.getElementById('btn-login').disabled = true;
 }
+</script>
+
+<!-- ================================================================= -->
+<!-- anime.js v4 animations                                            -->
+<!-- ================================================================= -->
+<script>
+(function() {
+    var { animate, createTimeline, stagger } = anime;
+
+    // =================================================================
+    // Helper: IntersectionObserver to trigger a callback once when
+    // an element scrolls into the viewport (or is already visible).
+    // =================================================================
+    function onReveal(el, callback, threshold) {
+        threshold = threshold || 0.15;
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    observer.unobserve(entry.target);
+                    callback(entry.target);
+                }
+            });
+        }, { threshold: threshold });
+        observer.observe(el);
+    }
+
+    // =================================================================
+    // 1. Falling coffee drops background
+    // =================================================================
+    var dropsContainer = document.getElementById('coffee-drops');
+    var dropCount = 25;
+
+    for (var i = 0; i < dropCount; i++) {
+        var drop = document.createElement('span');
+        drop.className = 'coffee-drop';
+        var size = 6 + Math.random() * 10;
+        drop.style.width = size + 'px';
+        drop.style.height = size + 'px';
+        drop.style.left = (Math.random() * 100) + '%';
+        dropsContainer.appendChild(drop);
+    }
+
+    document.querySelectorAll('.coffee-drop').forEach(function(drop) {
+        var fallDuration = 4000 + Math.random() * 6000;
+        var startDelay = Math.random() * 8000;
+        var drift = -30 + Math.random() * 60;
+
+        animate(drop, {
+            translateY: [0, window.innerHeight + 60],
+            translateX: [0, drift],
+            rotate: [135, 135 + (Math.random() * 40 - 20)],
+            opacity: [
+                { to: 0.3 + Math.random() * 0.15, duration: fallDuration * 0.1 },
+                { to: 0.3 + Math.random() * 0.15, duration: fallDuration * 0.7 },
+                { to: 0, duration: fallDuration * 0.2 }
+            ],
+            duration: fallDuration,
+            delay: startDelay,
+            loop: true,
+            ease: 'inOut(2)',
+        });
+    });
+
+    // =================================================================
+    // 1b. Coffee fluid wave animation at the bottom
+    // =================================================================
+    var waves = document.querySelectorAll('.coffee-fluid-wave');
+    waves.forEach(function(wave, i) {
+        animate(wave, {
+            translateX: ['-2%', '2%'],
+            duration: 3000 + i * 800,
+            loop: true,
+            alternate: true,
+            ease: 'inOut(2)',
+        });
+    });
+
+    // =================================================================
+    // 2. Header entrance timeline (plays immediately on load)
+    // =================================================================
+    createTimeline({ defaults: { ease: 'out(3)' } })
+        .add('.header .cup-icon', {
+            opacity: [0, 1],
+            scale: [0.3, 1],
+            rotate: [-30, 0],
+            duration: 800,
+        })
+        .add('.header h1', {
+            opacity: [0, 1],
+            translateY: [30, 0],
+            duration: 600,
+        }, '-=400')
+        .add('.header h1 small', {
+            opacity: [0, 1],
+            translateY: [20, 0],
+            duration: 500,
+        }, '-=300')
+        .add('.intro-text', {
+            opacity: [0, 1],
+            translateY: [20, 0],
+            duration: 600,
+        }, '-=200');
+
+    // =================================================================
+    // 3. Scroll-triggered reveals for all .anim-hidden elements
+    // =================================================================
+    document.querySelectorAll('.anim-hidden').forEach(function(el) {
+        onReveal(el, function(target) {
+            animate(target, {
+                opacity: [0, 1],
+                translateY: [40, 0],
+                duration: 700,
+                ease: 'out(3)',
+            });
+        });
+    });
+
+    // =================================================================
+    // 4. Table row stagger animation
+    // =================================================================
+    var compareTable = document.querySelector('.compare-table');
+    if (compareTable) {
+        var tableRows = compareTable.querySelectorAll('tr');
+        // hide rows initially
+        tableRows.forEach(function(row) { row.style.opacity = '0'; });
+
+        onReveal(compareTable, function() {
+            animate(tableRows, {
+                opacity: [0, 1],
+                translateX: [-30, 0],
+                duration: 500,
+                delay: stagger(100),
+                ease: 'out(3)',
+            });
+        });
+    }
+
+    // =================================================================
+    // 5. Diagram "typewriter" height reveal
+    // =================================================================
+    document.querySelectorAll('.diagram.typing').forEach(function(diagram) {
+        // Remove anim-hidden opacity; the typing effect handles visibility
+        diagram.classList.remove('anim-hidden');
+        diagram.style.opacity = '1';
+        diagram.style.maxHeight = '0';
+        diagram.style.overflow = 'hidden';
+
+        // Measure the real height by temporarily removing the constraint
+        diagram.style.position = 'absolute';
+        diagram.style.visibility = 'hidden';
+        diagram.style.maxHeight = 'none';
+        var fullHeight = diagram.scrollHeight;
+        diagram.style.position = '';
+        diagram.style.visibility = '';
+        diagram.style.maxHeight = '0';
+
+        onReveal(diagram, function() {
+            animate(diagram, {
+                maxHeight: [0, fullHeight],
+                duration: 1500,
+                ease: 'out(2)',
+            });
+        }, 0.05);
+    });
+
+    // =================================================================
+    // 6. Bean divider pop-in
+    // =================================================================
+    document.querySelectorAll('.bean-divider span').forEach(function(span) {
+        span.style.display = 'inline-block';
+        span.style.transform = 'scale(0)';
+
+        onReveal(span.parentElement, function() {
+            animate(span, {
+                scale: [0, 1],
+                rotate: [0, 360],
+                duration: 600,
+                ease: 'out(4)',
+            });
+        });
+    });
+
+    // =================================================================
+    // 7. Button hover + glow
+    // =================================================================
+    document.querySelectorAll('.btn-primary').forEach(function(btn) {
+        btn.classList.add('glow-pulse');
+        btn.addEventListener('mouseenter', function() {
+            animate(btn, { scale: 1.06, duration: 300, ease: 'out(3)' });
+        });
+        btn.addEventListener('mouseleave', function() {
+            animate(btn, { scale: 1, duration: 400, ease: 'out(2)' });
+        });
+    });
+
+    document.querySelectorAll('.btn-secondary').forEach(function(btn) {
+        btn.addEventListener('mouseenter', function() {
+            animate(btn, { scale: 1.04, duration: 250, ease: 'out(3)' });
+        });
+        btn.addEventListener('mouseleave', function() {
+            animate(btn, { scale: 1, duration: 350, ease: 'out(2)' });
+        });
+    });
+
+    // =================================================================
+    // 8. Animate new log entries as they appear
+    // =================================================================
+    var logBoxEl = document.getElementById('log');
+    new MutationObserver(function(mutations) {
+        mutations.forEach(function(m) {
+            m.addedNodes.forEach(function(node) {
+                if (node.nodeType === 1) {
+                    animate(node, {
+                        opacity: [0, 1],
+                        translateX: [-20, 0],
+                        duration: 350,
+                        ease: 'out(3)',
+                    });
+                }
+            });
+        });
+    }).observe(logBoxEl, { childList: true });
+
+    // =================================================================
+    // 9. Animate user chips when they appear
+    // =================================================================
+    var userListEl = document.getElementById('user-list');
+    new MutationObserver(function() {
+        var chips = userListEl.querySelectorAll('.user-chip');
+        if (chips.length > 0) {
+            animate(chips, {
+                opacity: [0, 1],
+                scale: [0.5, 1],
+                duration: 400,
+                delay: stagger(80),
+                ease: 'out(3)',
+            });
+        }
+    }).observe(userListEl, { childList: true, subtree: true });
+
+    // =================================================================
+    // 10. Card hover lift
+    // =================================================================
+    document.querySelectorAll('.card').forEach(function(card) {
+        card.addEventListener('mouseenter', function() {
+            animate(card, {
+                translateY: -4,
+                duration: 300,
+                ease: 'out(3)',
+            });
+        });
+        card.addEventListener('mouseleave', function() {
+            animate(card, {
+                translateY: 0,
+                duration: 400,
+                ease: 'out(2)',
+            });
+        });
+    });
+
+    // =================================================================
+    // 11. Footer fade in
+    // =================================================================
+    var footer = document.querySelector('footer');
+    if (footer) {
+        footer.style.opacity = '0';
+        onReveal(footer, function() {
+            animate(footer, {
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 600,
+                ease: 'out(3)',
+            });
+        });
+    }
+
+})();
 </script>
 </body>
 </html>

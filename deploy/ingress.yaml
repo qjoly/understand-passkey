@@ -5,15 +5,15 @@ metadata:
   labels:
     app: understand-passkey
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "cloudflare"
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   tls:
     - hosts:
-        - passkey.example.com
+        - understand-passkeys-with.a-cup-of.coffee
       secretName: understand-passkey-tls
   rules:
-    - host: passkey.example.com
+    - host: understand-passkeys-with.a-cup-of.coffee
       http:
         paths:
           - path: /

@@ -24,9 +24,9 @@ spec:
             - name: PORT
               value: "8080"
             - name: RP_ID
-              value: "passkey.example.com"
+              value: "understand-passkeys-with.a-cup-of.coffee"
             - name: RP_ORIGIN
-              value: "https://passkey.example.com"
+              value: "https://understand-passkeys-with.a-cup-of.coffee"
           resources:
             requests:
               cpu: 50m
