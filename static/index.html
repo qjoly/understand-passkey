@@ -406,9 +406,6 @@
         }
         .table-scroll .compare-table { margin: 0; }
 
-        /* Diagram line-typing effect */
-        .diagram.typing { overflow: hidden; }
-
         /* Coffee fluid pooling at the bottom */
         .coffee-fluid {
             position: fixed;
@@ -590,7 +587,7 @@
 
     <h2 class="anim-hidden"><span class="icon">&#128221;</span> Registration Flow</h2>
     <p>Like ordering your first cup &mdash; the barista (server) needs to get to know you:</p>
-    <div class="diagram anim-hidden typing">
+    <div class="diagram anim-hidden">
 <strong>Browser</strong>                        <strong>Server</strong>                        <strong>Authenticator</strong>
    |                               |                               |
    |  1. "I want to register"      |                               |
@@ -614,7 +611,7 @@
 
     <h2 class="anim-hidden"><span class="icon">&#128274;</span> Authentication Flow</h2>
     <p>Coming back for another cup &mdash; the barista recognises your order:</p>
-    <div class="diagram anim-hidden typing">
+    <div class="diagram anim-hidden">
 <strong>Browser</strong>                        <strong>Server</strong>                        <strong>Authenticator</strong>
    |                               |                               |
    |  1. "I want to log in"        |                               |
@@ -1125,25 +1122,8 @@ if (!window.PublicKeyCredential) {
     }
 
     // =================================================================
-    // 5. Diagram "typewriter" height reveal
+    // 5. (Removed — diagrams now use the standard anim-hidden reveal)
     // =================================================================
-    $('.diagram.typing').forEach(function(diagram) {
-        // Remove anim-hidden opacity; the typing effect handles visibility
-        diagram.classList.remove('anim-hidden');
-        set(diagram, { opacity: 1, maxHeight: 0, overflow: 'hidden' });
-
-        // Measure the real height by temporarily removing the constraint
-        set(diagram, { position: 'absolute', visibility: 'hidden', maxHeight: 'none' });
-        var fullHeight = diagram.scrollHeight;
-        set(diagram, { position: '', visibility: '', maxHeight: 0 });
-
-        animate(diagram, {
-            maxHeight: [0, fullHeight],
-            duration: 1500,
-            ease: 'out(2)',
-            autoplay: onScroll({ target: diagram, enter: 'bottom-=5% top' }),
-        });
-    });
 
     // =================================================================
     // 6. Bean divider pop-in
